@@ -2,8 +2,10 @@ const express = require("express");
 const app = express();
 const bodyParser = require('body-parser');
 const randToken = require("rand-token")
+const cors = require("cors")
 const mongoose = require('mongoose');
 const User = require("./models/User")
+const Gif = require("./models/Gif")
 mongoose.Promise = require('bluebird');
 const databaseURL = process.env.DATABASE || 'mongodb://localhost:27017/giffy'
 mongoose.connect(databaseURL);
@@ -14,6 +16,7 @@ app.listen( port, () => {
 })
 
 app.use(bodyParser.json())
+app.use(cors())
 
 app.post("/api/auth", (req, res) => {
   const username = req.body.username;
@@ -67,24 +70,19 @@ app.post("/api/registration", (req,res) => {
         errors: errors
       })
     }
-
-
   })
 })
 
-app.get("/api/me", (req, res) => {
+const authMiddleware = (req, res, next) => {
   let token = req.headers.authorization
   if (token){
     token = token.replace("Bearer ", "");
   }
-
   User.findOne({token: token})
   .then( user => {
     if (user){
-      res.json({
-        username: user.username,
-        token: user.token
-      })
+      req.user = user;
+      next()
     } else {
       res.status(401).json({
         errors: [
@@ -93,6 +91,44 @@ app.get("/api/me", (req, res) => {
       })
     }
   })
+}
+
+/// All these routes are required
+app.get("/api/me", authMiddleware, (req, res) => {
+  res.json({
+    username: req.user.username,
+    token: req.user.token
+  })
+})
+app.get("/api/me/gifs", authMiddleware, (req, res) => {
+  Gif.find({userId: req.user._id})
+  .then( gifs => {
+    res.json({
+      gifs: gifs
+    })
+  })
+})
+
+app.post("/api/gifs", authMiddleware, (req, res) => {
+  const userId = req.user._id;
+  const url = req.body.url;
+
+  const gif = new Gif({})
+  gif.userId = userId;
+  gif.url = url;
+  gif.save()
+  .then( gif => {
+    res.status(201).json({
+      gif: gif
+    })
+  })
+  .catch( e => {
+    res.status(422).json({
+      errors: [e.errors.url.message]
+    })
+  })
+
+
 })
 
 // send in a "Authorization: Bearer $TOKEN"
