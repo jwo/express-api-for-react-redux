@@ -324,6 +324,10 @@ qs@6.5.0:
   version "6.5.0"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.0.tgz#8d04954d364def3efc55b5a0793e1e2c8b1e6e49"
 
+rand-token@^0.3.0:
+  version "0.3.0"
+  resolved "https://registry.yarnpkg.com/rand-token/-/rand-token-0.3.0.tgz#32c0e672200867766a13601a21cef98ac67478c7"
+
 range-parser@~1.2.0:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/range-parser/-/range-parser-1.2.0.tgz#f49be6b487894ddc40dcc94a322f611092e00d5e"
