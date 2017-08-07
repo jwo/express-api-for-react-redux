@@ -101,7 +101,7 @@ app.get("/api/me", authMiddleware, (req, res) => {
   })
 })
 app.get("/api/me/gifs", authMiddleware, (req, res) => {
-  Gif.find({userId: req.user._id})
+  Gif.find({userId: req.user._id}).sort({createdAt: -1})
   .then( gifs => {
     res.json({
       gifs: gifs
