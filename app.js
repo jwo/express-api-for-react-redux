@@ -72,7 +72,30 @@ app.post("/api/registration", (req,res) => {
   })
 })
 
-// send in a "Authentication: Bearer $TOKEN"
+app.get("/api/me", (req, res) => {
+  let token = req.headers.authorization
+  if (token){
+    token = token.replace("Bearer ", "");
+  }
+
+  User.findOne({token: token})
+  .then( user => {
+    if (user){
+      res.json({
+        username: user.username,
+        token: user.token
+      })
+    } else {
+      res.status(401).json({
+        errors: [
+          "Missing or Invalid Token"
+        ]
+      })
+    }
+  })
+})
+
+// send in a "Authorization: Bearer $TOKEN"
 // without, you'll get a 401
 // Only endpoints without the 401: registration / auth
 
